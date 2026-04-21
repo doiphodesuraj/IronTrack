@@ -1,0 +1,158 @@
+// ===============================================================
+// Assumed Data Model
+// ===============================================================
+//
+// Collection: users
+// Document ID: userId (auth.uid)
+// Fields:
+//   - uid: string (required)
+//   - email: string (required)
+//   - displayName: string (optional)
+//   - photoURL: string (optional)
+//   - createdAt: timestamp (required)
+//   - stats: map (optional)
+//
+// Collection: users/{userId}/templates
+// Document ID: templateId
+// Fields:
+//   - userId: string (required)
+//   - name: string (required, max 100 chars)
+//   - exercises: list (required)
+//   - createdAt: timestamp (required)
+//   - updatedAt: timestamp (required)
+//
+// Collection: users/{userId}/sessions
+// Document ID: sessionId
+// Fields:
+//   - userId: string (required)
+//   - templateId: string (optional)
+//   - name: string (required)
+//   - startTime: timestamp (required)
+//   - endTime: timestamp (optional)
+//   - status: string (required, ['active', 'completed'])
+//   - exercises: list (required)
+//   - totalVolume: number (optional)
+//
+// Collection: users/{userId}/prs
+// Document ID: exerciseId
+// Fields:
+//   - userId: string (required)
+//   - exerciseId: string (required)
+//   - exerciseName: string (required)
+//   - maxWeight: number (required)
+//   - date: timestamp (required)
+//   - sessionId: string (required)
+//
+// ===============================================================
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidUrl(url) {
+      return url is string && (url.matches("^https://.*") || url.matches("^http://.*"));
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "doiphodesuraj@gmail.com" && request.auth.token.email_verified == true)); 
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return data.uid is string && data.uid == request.auth.uid &&
+             data.email is string && isValidEmail(data.email) &&
+             (data.displayName == null || (data.displayName is string && data.displayName.size() < 100)) &&
+             (data.photoURL == null || isValidUrl(data.photoURL)) &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidTemplate(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.exercises is list && data.exercises.size() <= 30 &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp;
+    }
+
+    function isValidSession(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.startTime is timestamp &&
+             data.status in ['active', 'completed'] &&
+             data.exercises is list && data.exercises.size() <= 30;
+    }
+
+    function isValidPR(data) {
+      return data.userId is string && data.userId == request.auth.uid &&
+             data.exerciseId is string && data.exerciseId.size() > 0 &&
+             data.exerciseName is string && data.exerciseName.size() > 0 &&
+             data.maxWeight is number && data.maxWeight >= 0 &&
+             data.date is timestamp &&
+             data.sessionId is string;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if (isOwner(userId) && isValidUser(request.resource.data) && areImmutableFieldsUnchanged(['uid', 'createdAt'])) || isAdmin();
+
+      match /templates/{templateId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidTemplate(request.resource.data);
+        allow update: if isOwner(userId) && isValidTemplate(request.resource.data) && areImmutableFieldsUnchanged(['userId', 'createdAt']);
+        allow delete: if isOwner(userId);
+      }
+
+      match /sessions/{sessionId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidSession(request.resource.data);
+        allow update: if isOwner(userId) && isValidSession(request.resource.data) && areImmutableFieldsUnchanged(['userId', 'startTime']);
+        allow delete: if isOwner(userId);
+      }
+
+      match /prs/{exerciseId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidPR(request.resource.data);
+        allow update: if isOwner(userId) && isValidPR(request.resource.data) && areImmutableFieldsUnchanged(['userId', 'exerciseId']);
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and statistics",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "stats": {
+          "type": "object",
+          "properties": {
+            "totalWorkouts": { "type": "integer" },
+            "streak": { "type": "integer" },
+            "lastWorkoutDate": { "type": "string", "format": "date-time" }
+          }
+        }
+      },
+      "required": ["uid", "email"]
+    },
+    "WorkoutTemplate": {
+      "title": "WorkoutTemplate",
+      "description": "A reusable workout template",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "exercises": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "exerciseId": { "type": "string" },
+              "name": { "type": "string" },
+              "defaultSets": { "type": "integer" },
+              "defaultReps": { "type": "integer" },
+              "defaultWeight": { "type": "number" }
+            }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "name"]
+    },
+    "WorkoutSession": {
+      "title": "WorkoutSession",
+      "description": "A recorded workout session",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "templateId": { "type": "string" },
+        "name": { "type": "string" },
+        "startTime": { "type": "string", "format": "date-time" },
+        "endTime": { "type": "string", "format": "date-time" },
+        "status": { "type": "string", "enum": ["active", "completed"] },
+        "exercises": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "exerciseId": { "type": "string" },
+              "name": { "type": "string" },
+              "sets": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "reps": { "type": "integer" },
+                    "weight": { "type": "number" },
+                    "isPR": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "totalVolume": { "type": "number" }
+      },
+      "required": ["userId", "name", "startTime", "status"]
+    },
+    "PersonalRecord": {
+      "title": "PersonalRecord",
+      "description": "Personal record for a specific exercise",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "exerciseId": { "type": "string" },
+        "exerciseName": { "type": "string" },
+        "maxWeight": { "type": "number" },
+        "date": { "type": "string", "format": "date-time" },
+        "sessionId": { "type": "string" }
+      },
+      "required": ["userId", "exerciseId", "maxWeight"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": "User", "description": "Primary user document" },
+    "/users/{userId}/templates/{templateId}": { "schema": "WorkoutTemplate", "description": "User's workout templates" },
+    "/users/{userId}/sessions/{sessionId}": { "schema": "WorkoutSession", "description": "User's workout history" },
+    "/users/{userId}/prs/{exerciseId}": { "schema": "PersonalRecord", "description": "User's personal records by exercise" }
+  }
+}
