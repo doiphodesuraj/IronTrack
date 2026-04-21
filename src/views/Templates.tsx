@@ -92,7 +92,7 @@ export default function Templates() {
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom duration-700">
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <h1 className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 text-3xl sm:text-5xl font-black italic uppercase tracking-tighter leading-tight max-w-full break-words">
+        <h1 className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 text-3xl sm:text-5xl font-black uppercase tracking-tighter leading-tight max-w-full break-words">
           <Dumbbell size={48} className="text-neon-blue" />
           <span className="bg-gradient-to-r from-neon-blue to-neon-purple bg-clip-text text-transparent">Templates</span>
         </h1>
@@ -101,7 +101,7 @@ export default function Templates() {
             onClick={() => setIsCreating(true)}
             className="glass-btn bg-neon-blue/20 hover:bg-neon-blue/30 text-neon-blue border border-neon-blue/20"
           >
-            <Plus size={20} /> <span className="font-black italic">NEW BLUEPRINT</span>
+            <Plus size={20} /> <span className="font-black">NEW BLUEPRINT</span>
           </button>
         )}
       </header>
@@ -119,7 +119,7 @@ export default function Templates() {
               value={newName}
               onChange={e => setNewName(e.target.value)}
               placeholder="e.g. ULTIMATE PUSH PROTOCOL"
-              className="w-full text-4xl font-black italic uppercase tracking-tight bg-transparent border-b-2 border-white/10 focus:border-neon-blue focus:outline-none transition-all placeholder:text-gray-700"
+              className="w-full text-4xl font-black uppercase tracking-tight bg-transparent border-b-2 border-white/10 focus:border-neon-blue focus:outline-none transition-all placeholder:text-gray-700"
             />
           </div>
 
@@ -145,7 +145,7 @@ export default function Templates() {
                         onChange={e => updateExercise(idx, { name: e.target.value })}
                         onFocus={() => setActiveSearchIdx(idx)}
                         onBlur={() => setTimeout(() => setActiveSearchIdx(null), 200)}
-                        className="w-full font-black italic uppercase text-lg bg-transparent border-b border-white/10 focus:border-neon-blue focus:outline-none placeholder:text-gray-700"
+                        className="w-full font-black uppercase text-lg bg-transparent border-b border-white/10 focus:border-neon-blue focus:outline-none placeholder:text-gray-700"
                         placeholder="e.g. FLAT BENCH PRESS"
                       />
                       {activeSearchIdx === idx && filteredSuggestions.length > 0 && (
@@ -166,7 +166,7 @@ export default function Templates() {
                               }}
                               className="w-full p-4 flex flex-col items-start hover:bg-white/5 transition-colors border-b border-white/5 last:border-0"
                             >
-                              <span className="text-sm font-black uppercase italic text-white">{suggestion.name}</span>
+                              <span className="text-sm font-black uppercase text-white">{suggestion.name}</span>
                               <span className="text-[10px] font-bold text-neon-blue/50 uppercase tracking-widest">{suggestion.category}</span>
                             </button>
                           ))}
@@ -203,8 +203,8 @@ export default function Templates() {
           </div>
 
           <div className="flex gap-4 pt-6">
-            <button onClick={handleCreate} className="flex-1 glass-btn bg-neon-blue text-black font-black uppercase italic text-xl shadow-[0_0_30px_rgba(0,210,255,0.3)]">Deploy Template</button>
-            <button onClick={() => setIsCreating(false)} className="px-8 glass-btn bg-white/5 text-gray-400 font-black uppercase italic border border-white/10">Abort</button>
+            <button onClick={handleCreate} className="flex-1 glass-btn bg-neon-blue text-black font-black uppercase text-xl shadow-[0_0_30px_rgba(0,210,255,0.3)]">Deploy Template</button>
+            <button onClick={() => setIsCreating(false)} className="px-8 glass-btn bg-white/5 text-gray-400 font-black uppercase border border-white/10">Abort</button>
           </div>
         </div>
       )}
@@ -214,7 +214,7 @@ export default function Templates() {
           <div key={template.id} className="glass-card flex flex-col h-full group float-3d overflow-hidden hover:border-neon-blue/30 transition-all">
             <div className="p-8 flex-1 space-y-6">
               <div className="flex justify-between items-start">
-                <h3 className="text-3xl font-black uppercase italic leading-none tracking-tight group-hover:text-neon-blue transition-colors">{template.name}</h3>
+                <h3 className="text-3xl font-black uppercase leading-none tracking-tight group-hover:text-neon-blue transition-colors">{template.name}</h3>
                 <button onClick={() => handleDelete(template.id)} className="p-2 text-gray-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all">
                   <Trash2 size={18} />
                 </button>
@@ -222,7 +222,7 @@ export default function Templates() {
               <div className="space-y-4">
                 {template.exercises.map((ex, i) => (
                   <div key={ex.exerciseId} className="flex items-center justify-between text-xs">
-                    <p className="font-black uppercase italic text-gray-400">
+                    <p className="font-black uppercase text-gray-400">
                       <span className="text-[10px] text-neon-blue mr-3 opacity-50">{(i+1).toString().padStart(2, '0')}</span>
                       {ex.name}
                     </p>
@@ -235,7 +235,7 @@ export default function Templates() {
             </div>
             <button 
               onClick={() => startSession(template.name, template.id, template.exercises)}
-              className="w-full py-6 bg-white/5 text-white font-black uppercase italic tracking-[0.2em] flex items-center justify-center gap-3 group/btn relative overflow-hidden transition-all hover:bg-neon-blue hover:text-black"
+              className="w-full py-6 bg-white/5 text-white font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 group/btn relative overflow-hidden transition-all hover:bg-neon-blue hover:text-black"
             >
               <div className="absolute inset-0 bg-white/20 translate-y-full group-hover/btn:translate-y-0 transition-transform duration-300"></div>
               <Play size={20} className="relative z-10 fill-current" /> <span className="relative z-10">Initialize Force</span>

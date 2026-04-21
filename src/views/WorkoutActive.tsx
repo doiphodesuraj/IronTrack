@@ -8,6 +8,8 @@ import { db, collection, getDocs, OperationType, handleFirestoreError } from '..
 import { PersonalRecord } from '../types';
 import { PREDEFINED_EXERCISES, ExerciseDef } from '../lib/exerciseData';
 
+const REST_DURATION_SECONDS = 30;
+
 export default function WorkoutActive() {
   const { user } = useAuth();
   const { 
@@ -28,6 +30,11 @@ export default function WorkoutActive() {
   const [prs, setPrs] = useState<Record<string, PersonalRecord>>({});
   const [exerciseSuggestions, setExerciseSuggestions] = useState<ExerciseDef[]>([]);
   const [filteredSuggestions, setFilteredSuggestions] = useState<ExerciseDef[]>([]);
+  const [restTimer, setRestTimer] = useState<{
+    exerciseIndex: number;
+    setIndex: number;
+    remaining: number;
+  } | null>(null);
 
   useEffect(() => {
     // Combine predefined with user history (from PRs)
@@ -100,11 +107,42 @@ export default function WorkoutActive() {
     return () => clearInterval(interval);
   }, [activeSession?.startTime]);
 
+  useEffect(() => {
+    if (!restTimer) return;
+
+    const interval = setInterval(() => {
+      setRestTimer((current) => {
+        if (!current) return null;
+        if (current.remaining <= 1) return null;
+        return {
+          ...current,
+          remaining: current.remaining - 1
+        };
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [restTimer]);
+
   const formatTime = (totalSeconds: number) => {
     const hrs = Math.floor(totalSeconds / 3600);
     const mins = Math.floor((totalSeconds % 3600) / 60);
     const secs = totalSeconds % 60;
     return `${hrs > 0 ? hrs + ':' : ''}${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const formatRest = (totalSeconds: number) => {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const startRestTimer = (exerciseIndex: number, setIndex: number) => {
+    setRestTimer({
+      exerciseIndex,
+      setIndex,
+      remaining: REST_DURATION_SECONDS
+    });
   };
 
   const handleUpdateSet = (exIdx: number, setIdx: number, updates: Partial<{weight: number, reps: number}>) => {
@@ -196,7 +234,7 @@ export default function WorkoutActive() {
             </div>
             <div>
               <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neon-blue leading-none mb-1">Mission Elapsed</p>
-              <p className="text-3xl font-black font-mono leading-none tracking-tighter italic text-white">{formatTime(seconds)}</p>
+              <p className="text-3xl font-black font-mono leading-none tracking-tighter text-white">{formatTime(seconds)}</p>
             </div>
           </div>
           <div className="flex gap-4">
@@ -206,7 +244,7 @@ export default function WorkoutActive() {
             <button 
               onClick={handleFinish} 
               disabled={isFinishing}
-              className="glass-btn bg-neon-blue text-black font-black uppercase italic tracking-widest min-w-[140px] shadow-[0_0_30px_rgba(0,210,255,0.3)] disabled:opacity-50"
+              className="glass-btn bg-neon-blue text-black font-black uppercase tracking-widest min-w-[140px] shadow-[0_0_30px_rgba(0,210,255,0.3)] disabled:opacity-50"
             >
               {isFinishing ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-black"></div>
@@ -222,7 +260,7 @@ export default function WorkoutActive() {
       <div className="pt-32 space-y-12">
         <div className="px-2">
           <p className="text-[10px] font-black uppercase tracking-[0.4em] text-gray-500 mb-2">Primary Objective</p>
-          <h1 className="max-w-full break-words text-4xl sm:text-6xl font-black uppercase italic tracking-tighter leading-tight text-white">
+          <h1 className="max-w-full break-words text-4xl sm:text-6xl font-black uppercase tracking-tighter leading-tight text-white">
             {activeSession.name}
           </h1>
           <div className="flex items-center gap-3 mt-4">
@@ -231,6 +269,12 @@ export default function WorkoutActive() {
               Telemetry initialized at {new Date(Number(activeSession.startTime)).toLocaleTimeString()}
             </p>
           </div>
+          {restTimer && (
+            <div className="mt-4 inline-flex items-center gap-3 rounded-full border border-neon-blue/20 bg-neon-blue/10 px-4 py-2 text-sm font-black uppercase tracking-[0.2em] text-neon-blue">
+              <Timer size={16} />
+              Rest {formatRest(restTimer.remaining)}
+            </div>
+          )}
         </div>
 
         <section className="space-y-8">
@@ -247,7 +291,7 @@ export default function WorkoutActive() {
                   <div className="space-y-1">
                     <div className="flex items-center gap-4">
                       <span className="text-[10px] font-black font-mono text-neon-blue opacity-50">{(exIdx + 1).toString().padStart(2, '0')}</span>
-                      <h3 className="text-2xl font-black uppercase italic tracking-tight text-white">{exercise.name}</h3>
+                      <h3 className="text-2xl font-black uppercase tracking-tight text-white">{exercise.name}</h3>
                     </div>
                     {prs[exercise.exerciseId] && (
                       <div className="flex items-center gap-2 pl-7">
@@ -275,13 +319,13 @@ export default function WorkoutActive() {
                   <div className="space-y-3">
                     {exercise.sets.map((set, setIdx) => (
                       <div key={setIdx} className="grid grid-cols-4 items-center bg-white/5 p-4 rounded-2xl group border border-transparent hover:border-white/10 hover:bg-white/[0.07] transition-all">
-                        <span className="text-lg font-black font-mono italic text-gray-400">#{(setIdx + 1).toString().padStart(2, '0')}</span>
+                        <span className="text-lg font-black font-mono text-gray-400">#{(setIdx + 1).toString().padStart(2, '0')}</span>
                         <div className="flex justify-center relative">
                           <input 
                             type="number"
                             value={set.weight || ''}
                             onChange={e => handleUpdateSet(exIdx, setIdx, { weight: parseFloat(e.target.value) || 0 })}
-                            className={`w-24 glass-input text-center text-xl font-black italic bg-transparent border-0 focus:ring-1 focus:ring-neon-blue ${set.isPR ? 'text-neon-purple' : 'text-white'}`}
+                            className={`w-24 glass-input text-center text-xl font-black bg-transparent border-0 focus:ring-1 focus:ring-neon-blue ${set.isPR ? 'text-neon-purple' : 'text-white'}`}
                             placeholder="0"
                           />
                           {set.isPR && (
@@ -299,14 +343,27 @@ export default function WorkoutActive() {
                             type="number"
                             value={set.reps || ''}
                             onChange={e => handleUpdateSet(exIdx, setIdx, { reps: parseInt(e.target.value) || 0 })}
-                            className="w-20 glass-input text-center text-xl font-black italic bg-transparent border-0 focus:ring-1 focus:ring-neon-blue"
+                            className="w-20 glass-input text-center text-xl font-black bg-transparent border-0 focus:ring-1 focus:ring-neon-blue"
                             placeholder="0"
                           />
                         </div>
                         <div className="flex justify-end pr-2">
-                          <button onClick={() => removeSet(exIdx, setIdx)} className="p-2 text-gray-600 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all">
-                            <Trash2 size={20} />
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => startRestTimer(exIdx, setIdx)}
+                              className={`p-2 rounded-xl transition-all ${
+                                restTimer?.exerciseIndex === exIdx && restTimer?.setIndex === setIdx
+                                  ? 'bg-neon-blue/20 text-neon-blue'
+                                  : 'text-gray-500 hover:text-neon-blue hover:bg-neon-blue/10'
+                              }`}
+                              title="Start 30 second rest"
+                            >
+                              <Timer size={18} />
+                            </button>
+                            <button onClick={() => removeSet(exIdx, setIdx)} className="p-2 text-gray-600 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all">
+                              <Trash2 size={20} />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -328,7 +385,7 @@ export default function WorkoutActive() {
                       value={newExName}
                       onChange={e => setNewExName(e.target.value)}
                       placeholder="SEARCH OR TYPE..."
-                      className="w-full text-3xl font-black italic uppercase italic tracking-tight bg-transparent border-b-2 border-white/10 focus:border-neon-blue focus:outline-none transition-all pl-8"
+                      className="w-full text-3xl font-black uppercase tracking-tight bg-transparent border-b-2 border-white/10 focus:border-neon-blue focus:outline-none transition-all pl-8"
                       onKeyDown={e => {
                         if (e.key === 'Enter') {
                           if (filteredSuggestions.length > 0) {
@@ -359,7 +416,7 @@ export default function WorkoutActive() {
                             className="w-full p-4 flex items-center justify-between hover:bg-white/5 text-left transition-colors border-b border-white/5 last:border-0"
                            >
                              <div className="flex flex-col">
-                               <span className="text-lg font-black uppercase italic text-white/80">{suggestion.name}</span>
+                               <span className="text-lg font-black uppercase text-white/80">{suggestion.name}</span>
                                <span className="text-[10px] font-bold text-neon-blue/50 uppercase tracking-widest">{suggestion.category}</span>
                              </div>
                              <div className="h-8 w-8 rounded-full bg-white/5 flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -380,7 +437,7 @@ export default function WorkoutActive() {
                         setShowAddExercise(false); 
                       }
                     }}
-                    className="glass-btn bg-neon-blue text-black font-black uppercase italic p-5 shadow-lg shadow-neon-blue/20"
+                    className="glass-btn bg-neon-blue text-black font-black uppercase p-5 shadow-lg shadow-neon-blue/20"
                   >
                     <Check size={28} />
                   </button>
@@ -395,7 +452,7 @@ export default function WorkoutActive() {
               onClick={() => setShowAddExercise(true)}
               className="w-full p-12 glass-card bg-white/5 border-2 border-dashed border-white/10 hover:border-neon-blue/30 hover:bg-neon-blue/5 text-gray-500 hover:text-neon-blue transition-all group overflow-hidden relative float-3d"
             >
-              <div className="relative z-10 flex items-center justify-center gap-4 text-2xl font-black uppercase italic tracking-[0.2em]">
+              <div className="relative z-10 flex items-center justify-center gap-4 text-2xl font-black uppercase tracking-[0.2em]">
                 <Plus size={32} className="group-hover:rotate-90 transition-transform duration-500" />
                 <span>Reinforce Roster</span>
               </div>

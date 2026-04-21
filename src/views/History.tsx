@@ -54,7 +54,7 @@ export default function History() {
               </div>
               <div className="flex-1">
                 <p className="text-[10px] font-black uppercase tracking-[0.3em] text-red-400 mb-2">Delete Workout</p>
-                <h2 className="text-3xl font-black italic uppercase tracking-tighter text-white">{pendingDelete.name}</h2>
+                <h2 className="text-3xl font-black uppercase tracking-tighter text-white">{pendingDelete.name}</h2>
                 <p className="mt-4 text-sm text-gray-300 leading-relaxed">
                   This will permanently remove the session from history and recalculate your PRs and workout stats from the remaining logs.
                 </p>
@@ -93,7 +93,7 @@ export default function History() {
       )}
 
       <header>
-        <h1 className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 text-3xl sm:text-5xl font-black italic uppercase tracking-tighter leading-tight max-w-full break-words">
+        <h1 className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 text-3xl sm:text-5xl font-black uppercase tracking-tighter leading-tight max-w-full break-words">
           <HistoryIcon size={48} className="text-neon-blue" />
           <span className="bg-gradient-to-r from-neon-blue to-neon-purple bg-clip-text text-transparent">Workout History</span>
         </h1>
@@ -101,7 +101,7 @@ export default function History() {
 
       <div className="space-y-8">
         {sessions.length === 0 ? (
-          <div className="glass-card p-20 text-center italic font-medium text-gray-500">
+          <div className="glass-card p-20 text-center font-medium text-gray-500">
              No chronometric data detected. Initialize cycle to record history.
           </div>
         ) : (
@@ -118,7 +118,7 @@ export default function History() {
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 leading-none mb-1">Total Volume</p>
-                  <p className="text-2xl font-black italic text-white tracking-tighter">
+                  <p className="text-2xl font-black text-white tracking-tighter">
                     {(session.totalVolume || 0).toLocaleString()} <span className="text-xs text-neon-blue">KG</span>
                   </p>
                 </div>
@@ -138,13 +138,13 @@ export default function History() {
               </div>
               
               <div className="p-8">
-                <h3 className="text-3xl font-black uppercase italic mb-8 tracking-tight">{session.name}</h3>
+                <h3 className="text-3xl font-black uppercase mb-8 tracking-tight">{session.name}</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-6">
                   {session.exercises.map((ex, i) => (
                     <div key={i} className="flex justify-between items-center border-b border-white/5 pb-4">
                        <div className="flex items-center gap-4">
                           <span className="text-[10px] font-mono text-neon-blue opacity-30">{(i+1).toString().padStart(2, '0')}</span>
-                          <span className="font-black uppercase italic text-sm text-gray-300">{ex.name}</span>
+                          <span className="font-black uppercase text-sm text-gray-300">{ex.name}</span>
                        </div>
                        <div className="text-right">
                           <div className="flex flex-wrap justify-end gap-2">

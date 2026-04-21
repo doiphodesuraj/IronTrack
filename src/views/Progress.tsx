@@ -114,7 +114,7 @@ export default function Progress() {
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom duration-700 pb-20">
       <header>
-        <h1 className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 text-3xl sm:text-5xl font-black italic uppercase tracking-tighter leading-tight max-w-full break-words">
+        <h1 className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 text-3xl sm:text-5xl font-black uppercase tracking-tighter leading-tight max-w-full break-words">
           <TrendingUp size={48} className="text-neon-blue" />
           <span className="bg-gradient-to-r from-neon-blue to-neon-purple bg-clip-text text-transparent">Analytics</span>
         </h1>
@@ -124,7 +124,7 @@ export default function Progress() {
         {/* volume Chart */}
         <section className="glass-card p-10 space-y-8 float-3d lg:col-span-2">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-black uppercase italic tracking-tight flex items-center gap-3">
+            <h2 className="text-2xl font-black uppercase tracking-tight flex items-center gap-3">
               <ChartBar size={28} className="text-neon-blue" /> Volume Trajectory
             </h2>
           </div>
@@ -169,7 +169,7 @@ export default function Progress() {
 
         {/* PR Rankings */}
         <section className="glass-card p-10 space-y-8 float-3d">
-          <h2 className="text-2xl font-black uppercase italic tracking-tight flex items-center gap-3">
+          <h2 className="text-2xl font-black uppercase tracking-tight flex items-center gap-3">
             <Trophy size={28} className="text-neon-purple" /> Elite Benchmarks
           </h2>
           <div className="h-[350px] w-full bg-white/[0.02] rounded-3xl p-4 border border-white/5">
@@ -206,7 +206,7 @@ export default function Progress() {
 
         {/* Muscle Distribution */}
         <section className="glass-card p-10 space-y-8 float-3d">
-          <h2 className="text-2xl font-black uppercase italic tracking-tight flex items-center gap-3">
+          <h2 className="text-2xl font-black uppercase tracking-tight flex items-center gap-3">
             <Dumbbell size={28} className="text-neon-blue" /> Muscle Bias
           </h2>
           <div className="h-[350px] w-full bg-white/[0.02] rounded-3xl p-4 border border-white/5">
@@ -236,7 +236,7 @@ export default function Progress() {
 
         {/* Template Comparison */}
         <section className="glass-card p-10 space-y-8 float-3d lg:col-span-2">
-          <h2 className="text-2xl font-black uppercase italic tracking-tight flex items-center gap-3">
+          <h2 className="text-2xl font-black uppercase tracking-tight flex items-center gap-3">
              <Save size={28} className="text-neon-blue" /> Protocol Potency
           </h2>
           <div className="h-[350px] w-full bg-white/[0.02] rounded-3xl p-4 border border-white/5">
@@ -268,7 +268,7 @@ export default function Progress() {
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="glass-card p-8 bg-gradient-to-br from-neon-blue/20 to-transparent border-neon-blue/20">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-neon-blue mb-4">Strategic Analytics</p>
-          <div className="text-2xl font-black italic tracking-tight leading-tight">
+          <div className="text-2xl font-black tracking-tight leading-tight">
             {muscleData.length > 0 ? (
               <>
                 Concentration peak in <span className="text-neon-blue uppercase">{sortedMuscleData[0].name}</span>. 
