@@ -60,6 +60,22 @@ export interface PersonalRecord {
   sessionId: string;
 }
 
+export interface HealthProfile {
+  userId: string;
+  heightCm: number;
+  goalWeightKg?: number | null;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
+export interface WeightLog {
+  id: string;
+  userId: string;
+  weightKg: number;
+  loggedAt: Timestamp;
+  note?: string | null;
+}
+
 export interface UserProfile {
   uid: string;
   email: string;

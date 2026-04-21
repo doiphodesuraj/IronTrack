@@ -8,6 +8,7 @@ import {
   LayoutDashboard, 
   History as HistoryIcon, 
   TrendingUp, 
+  Activity,
   Plus, 
   LogOut,
   Play,
@@ -18,6 +19,7 @@ import Templates from './views/Templates';
 import WorkoutActive from './views/WorkoutActive';
 import History from './views/History';
 import Progress from './views/Progress';
+import Health from './views/Health';
 
 function AppContent() {
   const { user, loading, signInWithGoogle } = useAuth();
@@ -131,12 +133,15 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-black immersive-bg relative flex flex-col md:flex-row">
       {/* Dynamic Glass Navigation */}
-      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-lg h-20 glass-card !rounded-full z-50 px-8 flex items-center justify-between shadow-[0_0_50px_rgba(0,210,255,0.1)] border-white/20">
+      <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[94%] max-w-2xl h-20 glass-card !rounded-full z-50 px-6 sm:px-8 flex items-center justify-between shadow-[0_0_50px_rgba(0,210,255,0.1)] border-white/20">
         <Link to="/" className={`p-3 rounded-full transition-all duration-300 hover:scale-110 ${location.pathname === '/' ? 'text-neon-blue bg-white/10 shadow-lg shadow-neon-blue/20' : 'text-gray-400'}`}>
           <LayoutDashboard size={28} />
         </Link>
         <Link to="/templates" className={`p-3 rounded-full transition-all duration-300 hover:scale-110 ${location.pathname === '/templates' ? 'text-neon-blue bg-white/10 shadow-lg shadow-neon-blue/20' : 'text-gray-400'}`}>
           <Plus size={28} />
+        </Link>
+        <Link to="/health" className={`p-3 rounded-full transition-all duration-300 hover:scale-110 ${location.pathname === '/health' ? 'text-neon-blue bg-white/10 shadow-lg shadow-neon-blue/20' : 'text-gray-400'}`}>
+          <Activity size={28} />
         </Link>
         {activeSession && (
           <Link to="/workout" className="relative group p-4 bg-gradient-to-br from-neon-blue to-neon-purple text-white rounded-full shadow-2xl scale-125 -translate-y-4 hover:scale-135 transition-all">
@@ -175,6 +180,7 @@ function AppContent() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/templates" element={<Templates />} />
+          <Route path="/health" element={<Health />} />
           <Route path="/workout" element={<WorkoutActive />} />
           <Route path="/history" element={<History />} />
           <Route path="/progress" element={<Progress />} />

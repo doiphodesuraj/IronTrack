@@ -43,6 +43,23 @@
 //   - date: timestamp (required)
 //   - sessionId: string (required)
 //
+// Collection: users/{userId}/health/profile
+// Document ID: profile
+// Fields:
+//   - userId: string (required)
+//   - heightCm: number (required)
+//   - goalWeightKg: number (optional)
+//   - createdAt: timestamp (required)
+//   - updatedAt: timestamp (required)
+//
+// Collection: users/{userId}/health/weightLogs
+// Document ID: weightLogId
+// Fields:
+//   - userId: string (required)
+//   - weightKg: number (required)
+//   - loggedAt: timestamp (required)
+//   - note: string (optional)
+//
 // ===============================================================
 
 rules_version = '2';
@@ -124,12 +141,31 @@ service cloud.firestore {
              data.sessionId is string;
     }
 
+        function isValidHealthProfileCreate(data) {
+      return data.userId == request.auth.uid &&
+             data.heightCm is number &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp;
+    }
+    function isValidHealthProfileUpdate(data) {
+      return data.userId == request.auth.uid &&
+             data.heightCm is number &&
+             data.updatedAt is timestamp;
+    }
+
+  function isValidWeightLog(data) {
+      return data.userId == request.auth.uid &&
+             data.weightKg is number &&
+             (data.loggedAt is timestamp || data.loggedAt == request.time) &&
+             (data.note == null || data.note is string);
+    }
+
     // ===============================================================
     // Rules
     // ===============================================================
 
     match /users/{userId} {
-      allow read: if isOwner(userId) || isAdmin();
+      allow read: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUser(request.resource.data);
       allow update: if (isOwner(userId) && isValidUser(request.resource.data) && areImmutableFieldsUnchanged(['uid', 'createdAt'])) || isAdmin();
 
@@ -151,6 +187,27 @@ service cloud.firestore {
         allow read: if isOwner(userId);
         allow create: if isOwner(userId) && isValidPR(request.resource.data);
         allow update: if isOwner(userId) && isValidPR(request.resource.data) && areImmutableFieldsUnchanged(['userId', 'exerciseId']);
+        allow delete: if isOwner(userId);
+      }
+
+      match /health/profile {
+        allow read: if isOwner(userId);
+
+        allow create: if isOwner(userId)
+                      && isValidHealthProfileCreate(request.resource.data);
+
+        allow update: if isOwner(userId)
+                      && isValidHealthProfileUpdate(request.resource.data);
+
+        allow delete: if isOwner(userId);
+      }
+
+      match /health/profile/weightLogs/{weightLogId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId)
+                      && isValidWeightLog(request.resource.data);
+        allow update: if isOwner(userId)
+                      && isValidWeightLog(request.resource.data);
         allow delete: if isOwner(userId);
       }
     }
