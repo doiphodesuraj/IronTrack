@@ -155,8 +155,13 @@ function AppContent() {
         <Link to="/progress" className={`p-3 rounded-full transition-all duration-300 hover:scale-110 ${location.pathname === '/progress' ? 'text-neon-blue bg-white/10 shadow-lg shadow-neon-blue/20' : 'text-gray-400'}`}>
           <TrendingUp size={28} />
         </Link>
-        <button onClick={() => auth.signOut()} className="hidden md:flex p-3 rounded-full text-gray-400 hover:text-red-400 hover:bg-red-400/10 transition-all">
-          <LogOut size={28} />
+        <button
+          onClick={() => auth.signOut()}
+          className="flex p-3 rounded-full text-gray-400 hover:text-red-400 hover:bg-red-400/10 transition-all"
+          aria-label="Log out"
+          title="Log out"
+        >
+          <LogOut size={24} />
         </button>
       </nav>
 
