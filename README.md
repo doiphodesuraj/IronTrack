@@ -66,7 +66,7 @@ Each user can only read and write their own data.
 npm install
 ```
 
-2. Make sure Firebase config is available in `firebase-applet-config.json`
+2. Create a local `.env` file using the variables in [.env.example](./.env.example)
 
 3. Start the dev server:
 
@@ -89,4 +89,4 @@ The app runs on `http://localhost:3000`.
 - Active workout sessions are persisted in browser storage so refreshes do not lose progress.
 - Session completion updates the workout history, user stats, and PR records.
 - The analytics screen derives chart data from Firestore session and PR documents.
-
+- Firebase config is loaded from `VITE_FIREBASE_*` environment variables at build time.
