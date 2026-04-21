@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth, onAuthStateChanged, User, doc, getDoc, setDoc, serverTimestamp, db, OperationType, handleFirestoreError, onSnapshot } from './firebase';
+import { auth, onAuthStateChanged, User, doc, getDoc, setDoc, serverTimestamp, db, OperationType, handleFirestoreError, onSnapshot, getRedirectResult, signInWithPopup, signInWithRedirect, googleProvider } from './firebase';
 import { UserProfile } from '../types';
 
 interface AuthContextType {
@@ -19,8 +19,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let unsubProfile: (() => void) | undefined;
+    let cancelled = false;
+
+    const bootstrapRedirect = async () => {
+      try {
+        await getRedirectResult(auth);
+      } catch (error) {
+        console.error('Redirect sign-in failed', error);
+      }
+    };
+
+    bootstrapRedirect();
 
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (cancelled) return;
       if (firebaseUser) {
         // Sync user document
         const userRef = doc(db, 'users', firebaseUser.uid);
@@ -60,27 +72,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
 
     return () => {
+      cancelled = true;
       unsubscribe();
       if (unsubProfile) unsubProfile();
     };
   }, []);
 
   const signInWithGoogle = async () => {
-    const { signInWithPopup, googleProvider } = await import('./firebase');
-    
     // Force account selection to avoid stuck sessions in iframe
     googleProvider.setCustomParameters({ prompt: 'select_account' });
 
     try {
+      const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+      if (isMobile) {
+        await signInWithRedirect(auth, googleProvider);
+        return;
+      }
+
       await signInWithPopup(auth, googleProvider);
     } catch (error: any) {
        console.error("Sign in error", error);
        
+       if (error.code === 'auth/operation-not-supported-in-this-environment') {
+         alert("Your browser blocked the sign-in method. Please open the app in a normal browser tab and try again.");
+         return;
+       }
        if (error.code === 'auth/popup-closed-by-user') {
          alert("The sign-in popup was closed before completion. Please try again and ensure you complete the sign-in process in the window that opens.\n\nTip: If you don't see a window, check if your browser blocked the popup.");
        } else if (error.code === 'auth/cancelled-popup-request') {
          // This happens if multiple sign-in requests are made rapidly
          return;
+       } else if (error.code === 'auth/unauthorized-domain') {
+         alert("This domain is not authorized in Firebase Auth. Add your Render domain and local domain to the authorized domains list in Firebase.");
        } else {
          alert(`Sign in failed: ${error.message}`);
        }
